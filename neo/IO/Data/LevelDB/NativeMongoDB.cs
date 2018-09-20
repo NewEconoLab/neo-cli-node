@@ -15,6 +15,7 @@ namespace Neo.IO.Data.LevelDB
         {
 
         }
+        // 单个操作
         public static void mongodb_del(Slice key)
         {
             MongoDBHelper.InnerDB.leveldb_DEL(key.buffer.ToHexString());
@@ -41,6 +42,58 @@ namespace Neo.IO.Data.LevelDB
             return false;
         }
 
+        // 批量操作
+        public void mongodb_batch_del(Slice key)
+        {
+            itemCache.Add(new Item { op = ItemOp.DEL, key = key });
+        }
+        public void mongodb_batch_put(Slice key, Slice value)
+        {
+            itemCache.Add(new Item { op = ItemOp.PUT, key = key, value = value });
+        }
+        public void commit()
+        {
+            int retry = 0;
+            while (++retry < 4)
+            {
+                try
+                {
+                    foreach (Item item in itemCache)
+                    {
+                        switch (item.op)
+                        {
+                            case ItemOp.DEL:
+                                MongoDBHelper.InnerDB.leveldb_DEL(item.key.buffer.ToHexString());
+                                break;
+                            case ItemOp.PUT:
+                                MongoDBHelper.InnerDB.leveldb_SET(item.key.buffer.ToHexString(), item.value.buffer.ToHexString());
+                                break;
+                        }
+                    }
+                    break;
+                }
+                catch (System.Exception ex)
+                {
+                    System.IO.File.AppendAllText("mongodb.log", ex.Message + "\r\n");
+                }
+            }
+            itemCache.Clear();
+        }
+
+        class Item
+        {
+            public ItemOp op { get; set; }
+            public Slice key { get; set; }
+            public Slice value { get; set; }
+        }
+        enum ItemOp : byte
+        {
+            PUT = 0x01,
+            DEL = 0x02,
+            GET = 0x03,
+        }
+        static List<Item> itemCache = new List<Item>();
+
     }
     public class MongoDBHelper
     {
@@ -53,9 +106,9 @@ namespace Neo.IO.Data.LevelDB
 
             public static bool setIndex()
             {
-                return MongoDBHelper.setIndex(dbConnStr, dbDatabase, leveldbCol, "i_key", "{'key':1}") ;
+                return MongoDBHelper.setIndex(dbConnStr, dbDatabase, leveldbCol, "i_key", "{'key':1}");
             }
-            
+
 
             public static void leveldb_SET(string key, string value)
             {
@@ -119,7 +172,7 @@ namespace Neo.IO.Data.LevelDB
                 public string value { get; set; }
             }
         }
-        
+
 
         public static long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, string findson = "{}")
         {

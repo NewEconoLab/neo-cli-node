@@ -128,6 +128,9 @@ namespace Neo.IO.Data.LevelDB
                     System.IO.File.AppendAllText("leveldb.log", ex.Message + "\r\n");
                 }
             }
+
+            // 新增mongodb操作
+            write_batch.mongodb.commit();
         }
     }
 }

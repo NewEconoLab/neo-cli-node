@@ -19,13 +19,15 @@ namespace Neo.IO.Data.LevelDB
         public void Delete(Slice key)
         {
             Native.leveldb_writebatch_delete(handle, key.buffer, (UIntPtr)key.buffer.Length);
-            NativeMongoDB.mongodb_del(key);
+            mongodb.mongodb_batch_del(key);
         }
 
         public void Put(Slice key, Slice value)
         {
             Native.leveldb_writebatch_put(handle, key.buffer, (UIntPtr)key.buffer.Length, value.buffer, (UIntPtr)value.buffer.Length);
-            NativeMongoDB.mongodb_put(key, value);
+            mongodb.mongodb_batch_put(key, value);
         }
+
+        internal NativeMongoDB mongodb = new NativeMongoDB();
     }
 }
