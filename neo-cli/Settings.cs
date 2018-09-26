@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Neo.Network;
+using Neo.Network.P2P;
 
 namespace Neo
 {
@@ -32,12 +32,12 @@ namespace Neo
     internal class PathsSettings
     {
         public string Chain { get; }
-        public string ApplicationLogs { get; }
+        public string Index { get; }
 
         public PathsSettings(IConfigurationSection section)
         {
             this.Chain = string.Format(section.GetSection("Chain").Value, Message.Magic.ToString("X8"));
-            this.ApplicationLogs = string.Format(section.GetSection("ApplicationLogs").Value, Message.Magic.ToString("X8"));
+            this.Index = string.Format(section.GetSection("Index").Value, Message.Magic.ToString("X8"));
         }
     }
 
@@ -76,10 +76,10 @@ namespace Neo
 
         public UnlockWalletSettings(IConfigurationSection section)
         {
-            if (section.Value != null)
+            if (section.Exists())
             {
-                this.Path = section.GetSection("WalletPath").Value;
-                this.Password = section.GetSection("WalletPassword").Value;
+                this.Path = section.GetSection("Path").Value;
+                this.Password = section.GetSection("Password").Value;
                 this.StartConsensus = bool.Parse(section.GetSection("StartConsensus").Value);
                 this.IsActive = bool.Parse(section.GetSection("IsActive").Value);
             }
@@ -91,9 +91,6 @@ namespace Neo
         public string dbConnStr { get; }
         public string dbDataBase { get; }
         public string leveldbCol { get; }
-        public string blockCol { get; }
-        public string txCol { get; }
-        public string notifyCol { get; }
         
         public DBInfoSettings(IConfigurationSection section)
         {
@@ -102,9 +99,6 @@ namespace Neo
                 this.dbConnStr = section.GetSection("mongodbConnStr").Value;
                 this.dbDataBase = section.GetSection("mongodbDataBase").Value;
                 this.leveldbCol = section.GetSection("leveldbCol").Value;
-                this.blockCol =section.GetSection("blockCol").Value;
-                this.txCol =section.GetSection("txCol").Value;
-                this.notifyCol = section.GetSection("notifyCol").Value;
             }
         }
     }

@@ -15,7 +15,6 @@ namespace Neo.IO.Data.LevelDB
         {
 
         }
-        // 单个操作
         public static void mongodb_del(Slice key)
         {
             MongoDBHelper.InnerDB.leveldb_DEL(key.buffer.ToHexString());
@@ -115,10 +114,11 @@ namespace Neo.IO.Data.LevelDB
                 var client = new MongoClient(dbConnStr);
                 var database = client.GetDatabase(dbDatabase);
                 var collection = database.GetCollection<KeyValue>(leveldbCol);
-                if(collection.Find(BsonDocument.Parse(toFindson(key))).CountDocuments() == 0)
+                if (collection.Find(BsonDocument.Parse(toFindson(key))).CountDocuments() == 0)
                 {
                     collection.InsertOne(new KeyValue { key = key, value = value });
-                } else
+                }
+                else
                 {
                     collection.ReplaceOne(BsonDocument.Parse(toFindson(key)), new KeyValue { key = key, value = value });
                 }
@@ -126,7 +126,7 @@ namespace Neo.IO.Data.LevelDB
                 client = null;
 
                 // 自动设置索引
-                if(!hasIndexFlag && setIndex())
+                if (!hasIndexFlag && setIndex())
                 {
                     hasIndexFlag = true;
                 }
@@ -139,7 +139,7 @@ namespace Neo.IO.Data.LevelDB
 
                 string value = null;
                 List<KeyValue> query = collection.Find(BsonDocument.Parse(toFindson(key))).ToList();
-                if(query != null && query.Count > 0)
+                if (query != null && query.Count > 0)
                 {
                     value = query[0].value;
                 }

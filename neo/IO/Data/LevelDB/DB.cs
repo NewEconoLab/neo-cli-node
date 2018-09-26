@@ -30,6 +30,7 @@ namespace Neo.IO.Data.LevelDB
             IntPtr error;
             Native.leveldb_delete(handle, options.handle, key.buffer, (UIntPtr)key.buffer.Length, out error);
             NativeHelper.CheckError(error);
+
             // 新增mongodb操作
             NativeMongoDB.mongodb_del(key);
         }
